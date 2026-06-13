@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Munro Log">
+<meta name="theme-color" content="#0b1a0b">
+<title>Munro Log — 282</title>
+<style>
+:root {
+  --bg:   #0b1a0b;
+  --bg2:  #132213;
+  --bg3:  #1c2e1c;
+  --bg4:  #243424;
+  --tx:   #e6dfc8;
+  --tx2:  #9fb88a;
+  --tx3:  #5e7f52;
+  --ac:   #7cbf6a;
+  --ac2:  #4a8a3a;
+  --bd:   rgba(124,191,106,.16);
+  --bd2:  rgba(124,191,106,.28);
+  --done: rgba(74,138,58,.1);
+  --btn:  #1c311c;
+  --inp:  rgba(255,255,255,.055);
+  --sh:   0 4px 20px rgba(0,0,0,.5);
+  --dk:   #8b3a28;
+  --dkh:  #aa4a32;
+}
+body.light {
+  --bg:   #f0ece2;
+  --bg2:  #faf8f3;
+  --bg3:  #e6e0d2;
+  --bg4:  #d8d0be;
+  --tx:   #1a2a10;
+  --tx2:  #3a5e28;
+  --tx3:  #688050;
+  --ac:   #3a7828;
+  --ac2:  #2a6018;
+  --bd:   rgba(58,120,40,.18);
+  --bd2:  rgba(58,120,40,.32);
+  --done: rgba(58,120,40,.07);
+  --btn:  #dbd5c5;
+  --inp:  rgba(0,0,0,.045);
+  --sh:   0 4px 16px rgba(0,0,0,.12);
+  --dk:   #c04030;
+  --dkh:  #a03020;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',system-ui,sans-serif;
+  background:var(--bg);color:var(--tx);
+  max-width:620px;margin:0 auto;
+  min-height:100vh;min-height:-webkit-fill-available;
+  padding-bottom:calc(env(safe-area-inset-bottom,0px) + 28px);
+}
+/* ── HEADER ── */
+#hdr{
+  position:sticky;top:0;z-index:100;
+  background:var(--bg);
+  border-bottom:1px solid var(--bd);
+  padding:12px 16px;
+  padding-top:calc(env(safe-area-inset-top,0px) + 12px);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+}
+.htop{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.htitle h1{font-size:21px;font-weight:700;letter-spacing:-.3px;line-height:1.2}
+.htitle h1 span{color:var(--ac)}
+.hsub{font-size:11px;color:var(--tx3);letter-spacing:.4px;margin-top:3px}
+.hright{text-align:right;flex-shrink:0;margin-left:12px}
+.hcount{font-size:28px;font-weight:700;color:var(--ac);line-height:1;letter-spacing:-1px}
+.hlabel{font-size:11px;color:var(--tx3);margin-top:1px}
+.pbw{height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-bottom:10px}
+.pb{height:100%;background:linear-gradient(90deg,var(--ac2),var(--ac));border-radius:3px;transition:width .6s cubic-bezier(.4,0,.2,1);width:0}
+/* ── CONTROLS ── */
+.ctrls{display:flex;flex-direction:column;gap:8px}
+.sw{position:relative}
+.sico{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--tx3);font-size:14px;pointer-events:none;line-height:1}
+input[type=search]{
+  width:100%;padding:11px 11px 11px 36px;
+  background:var(--inp);border:1px solid var(--bd);
+  border-radius:11px;color:var(--tx);font-size:15px;
+  font-family:inherit;outline:none;
+  -webkit-appearance:none;appearance:none;
+  transition:border-color .2s;
+}
+input[type=search]:focus{border-color:var(--bd2)}
+input[type=search]::placeholder{color:var(--tx3)}
+input[type=search]::-webkit-search-cancel-button{-webkit-appearance:none}
+.frow{display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:1px}
+.frow::-webkit-scrollbar{display:none}
+.fbtn{
+  flex-shrink:0;padding:7px 14px;border-radius:20px;
+  border:1px solid var(--bd);background:transparent;
+  color:var(--tx2);font-size:13px;font-family:inherit;
+  cursor:pointer;white-space:nowrap;min-height:36px;
+  transition:all .15s;-webkit-appearance:none;
+}
+.fbtn.act{background:var(--ac2);border-color:var(--ac2);color:#fff;font-weight:600}
+.fbtn:not(.act):active{opacity:.7}
+.sr{display:flex;gap:6px;align-items:stretch}
+select{
+  flex:1;padding:9px 26px 9px 10px;
+  background:var(--inp);border:1px solid var(--bd);
+  border-radius:11px;color:var(--tx);
+  font-size:13px;font-family:inherit;
+  outline:none;-webkit-appearance:none;appearance:none;cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%235e7f52' fill='none' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 9px center;
+}
+body.light select{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23688050' fill='none' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+select option{background:var(--bg2);color:var(--tx)}
+.dkbtn{
+  flex-shrink:0;width:44px;height:44px;min-height:44px;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:11px;border:1px solid var(--bd);
+  background:var(--btn);font-size:18px;cursor:pointer;
+  -webkit-appearance:none;transition:background .15s;
+}
+.dkbtn:active{opacity:.7}
+.ar{display:flex;gap:6px}
+.abtn{
+  flex:1;padding:9px 6px;border-radius:11px;
+  border:1px solid var(--bd);background:var(--btn);
+  color:var(--tx2);font-size:12px;font-weight:500;
+  font-family:inherit;cursor:pointer;text-align:center;
+  min-height:40px;-webkit-appearance:none;
+  white-space:nowrap;transition:background .15s;
+}
+.abtn.dng{border-color:rgba(139,58,40,.35);color:#c06050}
+.abtn:active{opacity:.7}
+/* ── LIST ── */
+#list{padding:6px 0 8px}
+.mc{border-bottom:1px solid var(--bd);transition:background .25s}
+.mc.done{background:var(--done)}
+/* Row */
+.mrow{
+  display:flex;align-items:center;padding:13px 16px;gap:12px;
+  cursor:pointer;min-height:64px;
+  -webkit-user-select:none;user-select:none;
+}
+.mrow:active{opacity:.75}
+/* Checkbox */
+.cb{
+  flex-shrink:0;width:34px;height:34px;border-radius:50%;
+  border:2px solid var(--bd2);background:transparent;
+  display:flex;align-items:center;justify-content:center;
+  font-size:17px;color:transparent;transition:all .25s;
+  cursor:pointer;
+}
+.mc.done .cb{background:var(--ac2);border-color:var(--ac2);color:#fff}
+/* Info */
+.mi{flex:1;min-width:0;pointer-events:none}
+.mn{font-size:15px;font-weight:500;color:var(--tx);line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mc.done .mn{color:var(--ac);font-weight:600}
+.mm{font-size:12px;color:var(--tx3);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mc.done .mm{color:var(--tx2)}
+/* Right side */
+.mr{display:flex;align-items:center;gap:8px;flex-shrink:0;pointer-events:none}
+.mh{font-size:13px;font-weight:600;color:var(--tx3);min-width:44px;text-align:right}
+.exbtn{
+  width:26px;height:26px;display:flex;align-items:center;
+  justify-content:center;color:var(--tx3);font-size:11px;
+  transition:transform .2s;pointer-events:none;flex-shrink:0;
+}
+.mc.expanded .exbtn{transform:rotate(180deg)}
+/* Detail panel */
+.dp{
+  display:none;padding:0 16px 14px;
+  flex-direction:column;gap:10px;
+  border-top:1px solid var(--bd);
+}
+.mc.expanded .dp{display:flex}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fl{font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.8px}
+.fi{
+  width:100%;padding:11px 13px;font-size:14px;min-height:46px;
+  border-radius:9px;border:1px solid var(--bd);
+  background:var(--inp);color:var(--tx);
+  font-family:inherit;outline:none;-webkit-appearance:none;
+  transition:border-color .2s;
+}
+.fi:focus{border-color:var(--bd2)}
+.fi::placeholder{color:var(--tx3)}
+textarea.fi{min-height:76px;resize:vertical;line-height:1.55;padding-top:11px}
+.tc{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+/* Empty */
+.empty{text-align:center;padding:44px 20px;color:var(--tx3);font-size:15px;line-height:1.5}
+.empty strong{display:block;font-size:20px;margin-bottom:6px;color:var(--tx2)}
+/* Toast */
+.toast{
+  position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);
+  left:50%;transform:translateX(-50%);
+  background:var(--bg3);border:1px solid var(--bd2);
+  color:var(--tx);padding:10px 20px;border-radius:22px;
+  font-size:14px;font-weight:500;z-index:999;
+  box-shadow:var(--sh);opacity:0;
+  transition:opacity .3s;pointer-events:none;white-space:nowrap;
+}
+.toast.show{opacity:1}
+/* Dialog */
+#dlg{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.7);z-index:200;
+  align-items:flex-end;justify-content:center;
+  padding:0 0 calc(env(safe-area-inset-bottom,0px) + 16px);
+}
+#dlg.show{display:flex}
+.dbox{
+  background:var(--bg2);border:1px solid var(--bd2);
+  border-radius:20px 20px 20px 20px;padding:26px 24px 20px;
+  width:100%;max-width:400px;margin:0 16px;
+  box-shadow:var(--sh);
+}
+.dbox h3{font-size:19px;font-weight:700;margin-bottom:8px;text-align:center}
+.dbox p{color:var(--tx2);font-size:14px;line-height:1.55;margin-bottom:22px;text-align:center}
+.dbtns{display:flex;gap:10px}
+.dbtns button{
+  flex:1;padding:14px;border-radius:12px;border:none;
+  font-family:inherit;font-size:15px;font-weight:600;
+  cursor:pointer;min-height:50px;-webkit-appearance:none;
+}
+.btnc{background:var(--btn);color:var(--tx)}
+.btnx{background:var(--dk);color:#fff}
+.btnx:active{background:var(--dkh)}
+/* Completion banner */
+#banner{
+  display:none;
+  margin:8px 16px 0;padding:14px 16px;
+  background:linear-gradient(135deg,var(--ac2),var(--ac));
+  border-radius:14px;color:#fff;
+  font-size:15px;font-weight:600;text-align:center;line-height:1.5;
+}
+#banner.show{display:block}
+</style>
+</head>
+<body class="dark">
+
+<div id="hdr">
+  <div class="htop">
+    <div class="htitle">
+      <h1>⛰ Munro <span>Log</span></h1>
+      <div class="hsub">Scottish Mountaineering Club · 282 Munros</div>
+    </div>
+    <div class="hright">
+      <div class="hcount" id="pc">0</div>
+      <div class="hlabel">of 282 · <span id="pct">0%</span></div>
+    </div>
+  </div>
+  <div class="pbw"><div class="pb" id="pb"></div></div>
+  <div class="ctrls">
+    <div class="sw">
+      <span class="sico">⌕</span>
+      <input type="search" id="si" placeholder="Search name or area…" autocomplete="off" autocorrect="off" spellcheck="false">
+    </div>
+    <div class="frow">
+      <button class="fbtn act" data-f="all">All 282</button>
+      <button class="fbtn" data-f="done">Completed (0)</button>
+      <button class="fbtn" data-f="rem">Remaining (282)</button>
+    </div>
+    <div class="sr">
+      <select id="sortSel">
+        <option value="alpha">Sort: A – Z</option>
+        <option value="hd">Sort: Height ↓ (highest first)</option>
+        <option value="ha">Sort: Height ↑ (lowest first)</option>
+        <option value="area">Sort: Area A – Z</option>
+      </select>
+      <select id="areaSel"><option value="">All Areas</option></select>
+      <button class="dkbtn" id="dkbtn" title="Toggle dark / light mode">🌙</button>
+    </div>
+    <div class="ar">
+      <button class="abtn" id="expBtn">⬇ Export</button>
+      <button class="abtn" id="impBtn">⬆ Import</button>
+      <button class="abtn dng" id="rstBtn">✕ Reset All</button>
+    </div>
+  </div>
+</div>
+
+<div id="banner">🏔 Compleation achieved — all 282 Munros bagged!</div>
+<div id="list"></div>
+
+<input type="file" id="impFile" accept=".json" style="display:none">
+<div class="toast" id="toast"></div>
+
+<div id="dlg">
+  <div class="dbox">
+    <h3>Reset All Progress?</h3>
+    <p>This permanently deletes all logged Munros, dates, companions, and notes.<br>This cannot be undone.</p>
+    <div class="dbtns">
+      <button class="btnc" id="dlgNo">Cancel</button>
+      <button class="btnx" id="dlgYes">Reset Everything</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// DATA — 282 official SMC Munros extracted from PDF
+// Source: Scottish Mountaineering Club Munro Tables
+// Format: [SMC_id, name, grid_ref, area, height_m]
+// Note: SMC numbering runs 1–283 with #155 absent = 282 total
+// Note: PDF entry 271 "Fionn Bheinn, Skye" corrected to
+//       Sgurr Alasdair (NG 449208 is definitively Sgurr Alasdair,
+//       the highest Cuillin peak at 992m; PDF name is erroneous)
+// ============================================================
+const RAW = [
+  [1,"Ben Vane","NN 278098","Arrochar Alps",915],
+  [2,"Beinn Narnain","NN 272067","Arrochar Alps",926],
+  [3,"Ben Vorlich","NN 295124","Arrochar Alps",943],
+  [4,"Beinn Ime","NN 255085","Arrochar Alps",1011],
+  [5,"Ben Hope","NC 477502","Assynt",927],
+  [6,"Ben Klibreck","NC 585299","Assynt",962],
+  [7,"Conival","NC 303199","Assynt",987],
+  [8,"Ben More Assynt","NC 318201","Assynt",998],
+  [9,"Stob a'Choire Odhair","NN 258461","Black Mount",945],
+  [10,"Stob Ghabhar","NN 230455","Black Mount",1090],
+  [11,"Creise","NN 238507","Black Mount",1100],
+  [12,"Meall a'Bhuiridh","NN 251503","Black Mount",1052],
+  [13,"Beinn Bhreac","NO 058971","Cairngorms",931],
+  [14,"The Devil's Point","NN 976951","Cairngorms",1004],
+  [15,"Mullach Clach a'Bhlair","NN 883927","Cairngorms",1019],
+  [16,"Carn a'Mhaim","NN 994952","Cairngorms",1037],
+  [17,"Beinn a'Chaorainn","NJ 045013","Cairngorms",1082],
+  [18,"Bynack More","NJ 042063","Cairngorms",1090],
+  [19,"Monadh Mor","NN 938942","Cairngorms",1113],
+  [20,"Sgor Gaoith","NN 903989","Cairngorms",1118],
+  [21,"Derry Cairngorm","NO 017980","Cairngorms",1155],
+  [22,"Beinn Bhrotain","NN 954923","Cairngorms",1157],
+  [23,"Leabaidh an Daimh Bhuidhe (Ben Avon)","NJ 132019","Cairngorms",1171],
+  [24,"Beinn Mheadhoin","NJ 024017","Cairngorms",1182],
+  [25,"Beinn a'Bhuird","NJ 093006","Cairngorms",1197],
+  [26,"Cairn Gorm","NJ 005040","Cairngorms",1245],
+  [27,"Sgor an Lochain Uaine","NN 954976","Cairngorms",1258],
+  [28,"Cairn Toul","NN 963972","Cairngorms",1291],
+  [29,"Braeriach","NN 953999","Cairngorms",1296],
+  [30,"Ben Macdui","NN 989989","Cairngorms",1309],
+  [31,"Glas Leathad Mor (Ben Wyvis)","NH 463684","Easter Ross",1046],
+  [32,"Carn Liath (Beinn a'Ghlo)","NN 936698","Forest of Atholl",975],
+  [33,"Braigh Coire Chruinn-bhalgain (Beinn a'Ghlo)","NN 946742","Forest of Atholl",1070],
+  [34,"Carn nan Gabhar (Beinn a'Ghlo)","NN 971733","Forest of Atholl",1121],
+  [35,"Beinn Dearg","NN 853778","Forest of Atholl",1008],
+  [36,"A'Bhuidheanach Bheag","NN 661776","Gaick Forest",936],
+  [37,"Carn na Caim","NN 677822","Gaick Forest",941],
+  [38,"Meall Chuaich","NN 716879","Gaick Forest",951],
+  [39,"A'Ghlas-Bheinn","NH 008231","Glen Affric",918],
+  [40,"An Socach","NH 088230","Glen Affric",1069],
+  [41,"Mullach na Dheiragain","NH 081259","Glen Affric",982],
+  [42,"Beinn Fhionnlaidh","NH 115282","Glen Affric",1005],
+  [43,"Beinn Fhada","NH 018192","Glen Affric",1032],
+  [44,"Toll Creagach","NH 194283","Glen Affric",1054],
+  [45,"Tom a'Choinich","NH 163273","Glen Affric",1111],
+  [46,"Sgurr nan Ceathreamhnan","NH 057228","Glen Affric",1151],
+  [47,"Mam Sodhail","NH 120253","Glen Affric",1181],
+  [48,"Carn Eighe","NH 123262","Glen Affric",1183],
+  [49,"Carn an t-Sagairt Mor","NO 208843","Glen Callater",1047],
+  [50,"Carn a'Coire Boidheach","NO 226845","Glen Callater",1110],
+  [51,"Carn nan Gobhar","NH 182344","Glen Cannich",992],
+  [52,"An Socach","NH 100333","Glen Cannich",1069],
+  [53,"An Riabhachan","NH 134345","Glen Cannich",1129],
+  [54,"Sgurr na Lapaich","NH 161351","Glen Cannich",1150],
+  [55,"Beinn Liath Mhor","NG 964519","Glen Carron",926],
+  [56,"Moruisg","NH 101499","Glen Carron",928],
+  [57,"Maol Chean-dearg","NG 924498","Glen Carron",933],
+  [58,"Bidean a'Choire Sheasgaich","NH 049413","Glen Carron",945],
+  [59,"Sgorr Ruadh","NG 959504","Glen Carron",962],
+  [60,"Lurg Mhor","NH 065404","Glen Carron",986],
+  [61,"Sgurr Choinnich","NH 076446","Glen Carron",999],
+  [62,"Maoile Lunndaidhe","NH 135458","Glen Carron",1007],
+  [63,"Sgurr a'Chaorachain","NH 087447","Glen Carron",1053],
+  [64,"Carn Aosda","NO 134791","Glen Clunie",917],
+  [65,"The Cairnwell","NO 135773","Glen Clunie",933],
+  [66,"Tom Buidhe","NO 214788","Glen Clunie",957],
+  [67,"Tolmount","NO 210800","Glen Clunie",958],
+  [68,"Carn a'Gheoidh","NO 107767","Glen Clunie",975],
+  [69,"Creag Leacach","NO 155745","Glen Clunie",987],
+  [70,"Carn an Tuirc","NO 174804","Glen Clunie",1019],
+  [71,"Cairn of Claise","NO 185789","Glen Clunie",1064],
+  [72,"Glas Maol","NO 166765","Glen Clunie",1068],
+  [73,"Stob Coire Raineach (Buachaille Etive Beag)","NN 191548","Glen Coe",925],
+  [74,"Stob Dubh (Buachaille Etive Beag)","NN 179535","Glen Coe",958],
+  [75,"Meall Dearg (Aonach Eagach)","NN 161584","Glen Coe",953],
+  [76,"Sgorr nam Fiannaidh (Aonach Eagach)","NN 141583","Glen Coe",967],
+  [77,"Stob na Broige (Buachaille Etive Mor)","NN 190525","Glen Coe",956],
+  [78,"Stob Dearg (Buachaille Etive Mor)","NN 223543","Glen Coe",1022],
+  [79,"Sgor na h-Ulaidh","NN 111518","Glen Coe",994],
+  [80,"Stob Coire Sgreamhach","NN 154536","Glen Coe",1072],
+  [81,"Bidean nam Bian","NN 143542","Glen Coe",1150],
+  [82,"Beinn Sgulaird","NN 053461","Glen Creran",937],
+  [83,"Sgurr nan Coireachan","NM 933958","Glen Dessarry",953],
+  [84,"Garbh Chioch Mhor","NM 909961","Glen Dessarry",1013],
+  [85,"Sgurr na Ciche","NM 902966","Glen Dessarry",1040],
+  [86,"Stob Binnein","NN 435227","Glen Dochart",1165],
+  [87,"Ben More","NN 433244","Glen Dochart",1174],
+  [88,"Mayar","NO 241738","Glen Doll",928],
+  [89,"Driesh","NO 271736","Glen Doll",947],
+  [90,"Mount Keen","NO 409869","Glen Esk",939],
+  [91,"Meall nan Eun","NN 192449","Glen Etive",928],
+  [92,"Beinn Fhionnlaidh","NN 095498","Glen Etive",959],
+  [93,"Beinn nan Aighenan","NN 148405","Glen Etive",960],
+  [94,"Glas Bheinn Mhor","NN 153429","Glen Etive",997],
+  [95,"Stob Coir'an Albannaich","NN 169442","Glen Etive",1044],
+  [96,"Ben Starav","NN 126427","Glen Etive",1078],
+  [97,"An Socach","NO 080800","Glen Ey",944],
+  [98,"Carn Bhac","NO 051832","Glen Ey",946],
+  [99,"Beinn Iutharn Mhor","NO 045792","Glen Ey",1045],
+  [100,"Beinn Chabhair","NN 368180","Glen Falloch",1004],
+  [101,"Beinn a'Chroin","NN 394186","Glen Falloch",940],
+  [102,"Beinn Tulaichean","NN 416196","Glen Falloch",946],
+  [103,"An Caisteal","NN 379193","Glen Falloch",995],
+  [104,"Cruach Ardrain","NN 409212","Glen Falloch",1046],
+  [105,"Sgurr nan Coireachan","NM 903880","Glen Finnan",956],
+  [106,"Sgurr Thuilm","NM 939879","Glen Finnan",963],
+  [107,"Beinn Bhuidhe","NN 204187","Glen Fyne",948],
+  [108,"Gairich","NN 025995","Glen Kingie",919],
+  [109,"Sgurr Mor","NM 965980","Glen Kingie",1003],
+  [110,"Ben Chonzie","NN 773309","Glen Lednock",931],
+  [111,"Sgiath Chuil","NN 463318","Glen Lochay",921],
+  [112,"Meall Glas","NN 431322","Glen Lochay",959],
+  [113,"Creag Mhor","NN 391361","Glen Lochay",1047],
+  [114,"Beinn Heasgarnich","NN 413383","Glen Lochay",1078],
+  [115,"Carn an Righ","NO 028773","Glen Lochsie",1029],
+  [116,"Glas Tulaichean","NO 051760","Glen Lochsie",1051],
+  [117,"Beinn a'Chleibh","NN 251256","Glen Lochy",916],
+  [118,"Ben Lui","NN 266263","Glen Lochy",1130],
+  [119,"Meall Buidhe","NN 498499","Glen Lyon",932],
+  [120,"Stuchd an Lochain","NN 483449","Glen Lyon",960],
+  [121,"Meall Garbh","NN 646517","Glen Lyon",968],
+  [122,"Creag Mhor","NN 695496","Glen Lyon",981],
+  [123,"Carn Gorm","NN 635501","Glen Lyon",1029],
+  [124,"Meall Ghaordaidh","NN 514397","Glen Lyon",1039],
+  [125,"Carn Mairg","NN 684513","Glen Lyon",1041],
+  [126,"Broad Cairn","NO 240815","Glen Muick",998],
+  [127,"Cairn Bannoch","NO 223826","Glen Muick",1012],
+  [128,"Lochnagar","NO 244861","Glen Muick",1155],
+  [129,"Creag nan Damh","NG 983112","Glen Shiel",918],
+  [130,"Sgurr na Sgine","NG 946113","Glen Shiel",946],
+  [131,"Creag a'Mhaim","NH 088078","Glen Shiel",947],
+  [132,"Saileag","NH 018148","Glen Shiel",959],
+  [133,"Maol Chinn-dearg","NH 032088","Glen Shiel",981],
+  [134,"Druim Shionnach","NH 074085","Glen Shiel",987],
+  [135,"Sgurr na Carnach","NG 977158","Glen Shiel",1002],
+  [136,"Aonach Meadhoin","NH 049137","Glen Shiel",1001],
+  [137,"Sgurr an Lochain","NH 005104","Glen Shiel",1004],
+  [138,"Sgurr an Doire Leathain","NH 015099","Glen Shiel",1010],
+  [139,"The Saddle","NG 936131","Glen Shiel",1010],
+  [140,"Aonach air Chrith","NH 051083","Glen Shiel",1021],
+  [141,"Sgurr na Ciste Duibhe","NG 984149","Glen Shiel",1027],
+  [142,"Sgurr a'Bhealaich Dheirg","NH 035143","Glen Shiel",1036],
+  [143,"Sgurr Fhuaran","NG 978167","Glen Shiel",1067],
+  [144,"Carn nan Gobhar","NH 273439","Glen Strathfarrar",992],
+  [145,"Sgurr na Ruaidhe","NH 289426","Glen Strathfarrar",993],
+  [146,"Sgurr Fuar-thuill","NH 236437","Glen Strathfarrar",1049],
+  [147,"Sgurr a'Choire Ghlais","NH 259430","Glen Strathfarrar",1083],
+  [148,"Carn a'Chlamain","NN 916758","Glen Tilt",963],
+  [149,"Stob Ban","NN 266724","Grey Corries",977],
+  [150,"Stob Coire an Laoigh","NN 240725","Grey Corries",1116],
+  [151,"Stob Choire Claurigh","NN 262739","Grey Corries",1177],
+  [152,"Luinne Bheinn","NG 869008","Knoydart",939],
+  [153,"Meall Buidhe","NM 849990","Knoydart",946],
+  [154,"Ladhar Bheinn","NG 824040","Knoydart",1020],
+  [156,"Ruadh Stac Mor","NH 018756","Letterewe",918],
+  [157,"Beinn Tarsuinn","NH 039727","Letterewe",937],
+  [158,"A'Mhaighdean","NH 008749","Letterewe",967],
+  [159,"Sgurr Ban","NH 055745","Letterewe",989],
+  [160,"Mullach Coire Mhic Fhearchair","NH 052735","Letterewe",1019],
+  [161,"Sgurr Fiona (An Teallach)","NH 064837","Letterewe",1060],
+  [162,"Bidein a'Ghlas Thuill (An Teallach)","NH 069844","Letterewe",1062],
+  [163,"Beinn a'Chochuill","NN 110328","Loch Awe",980],
+  [164,"Beinn Eunaich","NN 136328","Loch Awe",989],
+  [165,"Stob Diamh","NN 095308","Loch Awe",978],
+  [166,"Ben Cruachan","NN 069304","Loch Awe",1126],
+  [167,"Seana Bhraigh","NH 281879","Loch Broom",927],
+  [168,"Eididh nan Clach Geala","NH 258842","Loch Broom",928],
+  [169,"Meall nan Ceapraichean","NH 257826","Loch Broom",977],
+  [170,"Beinn Dearg","NH 259812","Loch Broom",1084],
+  [171,"Carn Ghluasaid","NH 146125","Loch Cluanie",957],
+  [172,"Ciste Dhubh","NH 062166","Loch Cluanie",979],
+  [173,"Sail Chaorainn","NH 133155","Loch Cluanie",1002],
+  [174,"Mullach Fraoch-choire","NH 095171","Loch Cluanie",1102],
+  [175,"Sgurr nan Conbhairean","NH 130139","Loch Cluanie",1109],
+  [176,"A'Chralaig","NH 094148","Loch Cluanie",1120],
+  [177,"Stuc a'Chroin","NN 617175","Loch Earn",975],
+  [178,"Ben Vorlich","NN 629189","Loch Earn",985],
+  [179,"Gulvain","NN 003876","Loch Eil",987],
+  [180,"Geal-charn","NN 597783","Loch Ericht",1132],
+  [181,"A'Mharconaich","NN 604763","Loch Ericht",975],
+  [182,"Sgairneach Mhor","NN 599731","Loch Ericht",991],
+  [183,"Beinn Udlamain","NN 579740","Loch Ericht",1011],
+  [184,"Beinn Bheoil","NN 517717","Loch Ericht",1019],
+  [185,"Carn Dearg","NN 504764","Loch Ericht",1034],
+  [186,"Beinn Eibhinn","NN 449733","Loch Ericht",1102],
+  [187,"Aonach Beag","NN 458742","Loch Ericht",1116],
+  [188,"Geal-Charn","NN 470746","Loch Ericht",1049],
+  [189,"Ben Alder","NN 496718","Loch Ericht",1148],
+  [190,"An Coileachan","NH 241680","Loch Fannich",923],
+  [191,"Sgurr nan Each","NH 184697","Loch Fannich",923],
+  [192,"Fionn Bheinn","NH 147621","Loch Fannich",933],
+  [193,"Meall a'Chrasgaidh","NH 184733","Loch Fannich",934],
+  [194,"Meall Gorm","NH 221696","Loch Fannich",949],
+  [195,"Beinn Liath Mhor Fannaich","NH 219724","Loch Fannich",954],
+  [196,"A'Chailleach","NH 136714","Loch Fannich",997],
+  [197,"Sgurr Breac","NH 158711","Loch Fannich",1000],
+  [198,"Sgurr nan Clach Geala","NH 184715","Loch Fannich",1093],
+  [199,"Sgurr Mor","NH 203718","Loch Fannich",1110],
+  [200,"Am Faochagach","NH 304794","Loch Glascarnoch",953],
+  [201,"Cona'Mheall","NH 275816","Loch Glascarnoch",978],
+  [202,"Beinn Sgritheall","NG 836126","Loch Hourn",974],
+  [203,"Beinn Teallach","NN 361860","Loch Laggan",915],
+  [204,"Carn Liath","NN 472903","Loch Laggan",1006],
+  [205,"Beinn a'Chaorainn","NN 386851","Loch Laggan",1052],
+  [206,"Stob Poite Coire Ardair","NN 429889","Loch Laggan",1054],
+  [207,"Creag Meagaidh","NN 418875","Loch Laggan",1130],
+  [208,"Sgorr Dhonuill","NN 040555","Loch Leven",1001],
+  [209,"Sgorr Dhearg","NN 056558","Loch Leven",1024],
+  [210,"Meall na Teanga","NN 220925","Loch Lochy",917],
+  [211,"Sron a'Choire Ghairbh","NN 222945","Loch Lochy",935],
+  [212,"Ben Lomond","NN 367029","Loch Lomond",974],
+  [213,"Beinn Mhanach","NN 373412","Loch Lyon",954],
+  [214,"Beinn an Dothaidh","NN 332408","Loch Lyon",1004],
+  [215,"Beinn Achaladair","NN 346433","Loch Lyon",1038],
+  [216,"Beinn Dorain","NN 326378","Loch Lyon",1076],
+  [217,"Beinn a'Chreachain","NN 373441","Loch Lyon",1081],
+  [218,"Slioch","NH 005688","Loch Maree",980],
+  [219,"Beinn na Lap","NN 376696","Loch Ossian",937],
+  [220,"Carn Dearg","NN 418461","Loch Ossian",1034],
+  [221,"Sgor Gaibhre","NN 444674","Loch Ossian",955],
+  [222,"Creag Pitridh","NN 488814","Loch Pattack",924],
+  [223,"Geal Charn","NN 504812","Loch Pattack",1049],
+  [224,"Beinn a'Chlachair","NN 471781","Loch Pattack",1087],
+  [225,"Spidean Mialach","NH 066043","Loch Quoich",996],
+  [226,"Sgurr a'Mhaoraich","NG 984065","Loch Quoich",1027],
+  [227,"Gleouraich","NH 039054","Loch Quoich",1035],
+  [228,"Meall a'Choire Leith (Ben Lawers)","NN 612439","Loch Tay",926],
+  [229,"Meall Greigh (Ben Lawers)","NN 674438","Loch Tay",1001],
+  [230,"Meall Corranaich (Ben Lawers)","NN 616410","Loch Tay",1069],
+  [231,"Schiehallion","NN 714548","Loch Tay",1083],
+  [232,"Beinn Ghlas (Ben Lawers)","NN 626404","Loch Tay",1103],
+  [233,"An Stuc (Ben Lawers)","NN 639431","Loch Tay",1118],
+  [234,"Meall Garbh (Ben Lawers)","NN 644437","Loch Tay",1118],
+  [235,"Ben Lawers","NN 636414","Loch Tay",1214],
+  [236,"Stob Coire Sgriodain","NN 356744","Loch Treig",976],
+  [237,"Chno Dearg","NN 377741","Loch Treig",1046],
+  [238,"Stob a'Choire Mheadhoin","NN 316736","Loch Treig",1105],
+  [239,"Stob Coire Easain","NN 308730","Loch Treig",1115],
+  [240,"Sgurr Choinnich Mor","NN 227714","Lochaber",1094],
+  [241,"Aonach Mor","NN 193730","Lochaber",1221],
+  [242,"Carn Mor Dearg","NN 177722","Lochaber",1220],
+  [243,"Aonach Beag","NN 196715","Lochaber",1234],
+  [244,"Ben Nevis","NN 166713","Lochaber",1345],
+  [245,"Mullach nan Coirean","NN 122662","Mamores",939],
+  [246,"Binnein Beag","NN 222677","Mamores",943],
+  [247,"Stob Coire a'Chairn","NN 185661","Mamores",981],
+  [248,"An Gearanach","NN 188670","Mamores",982],
+  [249,"Stob Ban","NN 148654","Mamores",999],
+  [250,"Sgurr Eilde Mor","NN 231658","Mamores",1008],
+  [251,"Am Bodach","NN 176651","Mamores",1032],
+  [252,"Na Gruagaichean","NN 203652","Mamores",1056],
+  [253,"Sgurr a'Mhaim","NN 165667","Mamores",1099],
+  [254,"Binnein Mor","NN 212663","Mamores",1130],
+  [255,"Carn Sgulain","NH 684059","Monadh Liath",920],
+  [256,"Geal Charn","NN 561987","Monadh Liath",926],
+  [257,"A'Chailleach","NH 681042","Monadh Liath",930],
+  [258,"Carn Dearg","NH 635024","Monadh Liath",945],
+  [259,"Ben More (Mull)","NM 526331","Mull",966],
+  [260,"Sgurr a'Mhadaidh","NG 446235","Skye",918],
+  [261,"Sgurr nan Eag","NG 457195","Skye",924],
+  [262,"Blaven","NG 530217","Skye",928],
+  [263,"Am Basteir","NG 465253","Skye",934],
+  [264,"Sgurr Dubh Mor","NG 457205","Skye",944],
+  [265,"Sgurr Mhic Choinnich","NG 450210","Skye",948],
+  [266,"Bruach na Frithe","NG 461252","Skye",958],
+  [267,"Sgurr nan Gillean","NG 472253","Skye",964],
+  [268,"Sgurr na Banachdich","NG 440225","Skye",965],
+  [269,"Sgurr a'Ghreadaidh","NG 445232","Skye",973],
+  [270,"Inaccessible Pinnacle","NG 444215","Skye",986],
+  [271,"Sgurr Alasdair","NG 449208","Skye",992],
+  [272,"Beinn Dubhchraig","NN 308255","Strath Fillan",978],
+  [273,"Ben Challum","NN 387322","Strath Fillan",1025],
+  [274,"Ben Oss","NN 288253","Strath Fillan",1029],
+  [275,"Carn an Fhidhleir","NN 905842","Tarf Water",994],
+  [276,"An Sgarsoch","NN 933837","Tarf Water",1006],
+  [277,"Meall nan Tarmachan","NN 585390","Tarmachan Hills",1044],
+  [278,"Tom na Gruagaich (Beinn Alligin)","NG 859601","Torridon",922],
+  [279,"Sgurr Mhor (Beinn Alligin)","NG 866613","Torridon",986],
+  [280,"Spidean Coire nan Clach (Beinn Eighe)","NG 966597","Torridon",993],
+  [281,"Ruadh-stac Mor (Beinn Eighe)","NG 951611","Torridon",1010],
+  [282,"Mullach an Rathain (Liathach)","NG 912577","Torridon",1023],
+  [283,"Spidean a'Choire Leith (Liathach)","NG 929580","Torridon",1054]
+];
+
+// Build objects
+const MUNROS = RAW.map(r => ({ id:r[0], name:r[1], grid:r[2], area:r[3], h:r[4] }));
+
+// ─── State ───────────────────────────────────────────────────
+const ST = { search:'', filter:'all', sort:'alpha', area:'', expanded:null, dark:true, progress:{} };
+const SK = 'munro-log-v2';
+const SETK = 'munro-log-settings-v2';
+
+// ─── Storage ─────────────────────────────────────────────────
+function load() {
+  try { const d = localStorage.getItem(SK); if(d) ST.progress = JSON.parse(d); } catch(e){}
+  try { const s = localStorage.getItem(SETK); if(s) { const p = JSON.parse(s); if(typeof p.dark==='boolean') ST.dark=p.dark; } } catch(e){}
+}
+function save() { try { localStorage.setItem(SK, JSON.stringify(ST.progress)); } catch(e){} }
+function saveSettings() { try { localStorage.setItem(SETK, JSON.stringify({dark:ST.dark})); } catch(e){} }
+
+// ─── Helpers ─────────────────────────────────────────────────
+function today() { return new Date().toISOString().slice(0,10); }
+function fmtDate(d) { if(!d) return ''; const p=d.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function doneCount() { return Object.values(ST.progress).filter(p=>p&&p.done).length; }
+
+// ─── Filter / sort ───────────────────────────────────────────
+function getFiltered() {
+  let r = [...MUNROS];
+  if(ST.area) r = r.filter(m=>m.area===ST.area);
+  if(ST.search) {
+    const q = ST.search.toLowerCase();
+    r = r.filter(m=>m.name.toLowerCase().includes(q)||m.area.toLowerCase().includes(q)||m.grid.toLowerCase().includes(q));
+  }
+  if(ST.filter==='done') r = r.filter(m=>ST.progress[m.id]&&ST.progress[m.id].done);
+  if(ST.filter==='rem')  r = r.filter(m=>!ST.progress[m.id]||!ST.progress[m.id].done);
+  if(ST.sort==='alpha')  r.sort((a,b)=>a.name.localeCompare(b.name));
+  else if(ST.sort==='hd') r.sort((a,b)=>b.h-a.h);
+  else if(ST.sort==='ha') r.sort((a,b)=>a.h-b.h);
+  else if(ST.sort==='area') r.sort((a,b)=>a.area.localeCompare(b.area)||a.name.localeCompare(b.name));
+  return r;
+}
+
+// ─── Progress UI ─────────────────────────────────────────────
+function updateProgressUI() {
+  const n = doneCount();
+  const pct = Math.round(n/282*100);
+  document.getElementById('pc').textContent = n;
+  document.getElementById('pct').textContent = pct+'%';
+  document.getElementById('pb').style.width = pct+'%';
+  const btns = document.querySelectorAll('.fbtn');
+  if(btns[1]) btns[1].textContent = 'Completed ('+n+')';
+  if(btns[2]) btns[2].textContent = 'Remaining ('+(282-n)+')';
+  const banner = document.getElementById('banner');
+  if(banner) banner.classList.toggle('show', n===282);
+}
+
+// ─── Render list ─────────────────────────────────────────────
+function renderList() {
+  const filtered = getFiltered();
+  const el = document.getElementById('list');
+  if(!filtered.length) {
+    el.innerHTML = '<div class="empty"><strong>No results</strong>Try a different name, area, or clear your filters</div>';
+    return;
+  }
+  el.innerHTML = filtered.map(m => {
+    const p  = ST.progress[m.id]||{};
+    const done = !!p.done;
+    const exp  = ST.expanded===m.id;
+    const parts = [m.area, m.grid];
+    if(done && p.date) parts.push(fmtDate(p.date));
+    if(done && p.companions) parts.push(esc(p.companions));
+    const meta = parts.join(' · ');
+    return '<div class="mc'+(done?' done':'')+(exp?' expanded':'')+'" data-id="'+m.id+'">'
+      +'<div class="mrow">'
+        +'<div class="cb" data-cb="'+m.id+'">'+(done?'✓':'')+'</div>'
+        +'<div class="mi" data-ex="'+m.id+'">'
+          +'<div class="mn">'+esc(m.name)+'</div>'
+          +'<div class="mm">'+meta+'</div>'
+        +'</div>'
+        +'<div class="mr">'
+          +'<div class="mh">'+m.h+'m</div>'
+          +'<div class="exbtn" data-ex="'+m.id+'">▾</div>'
+        +'</div>'
+      +'</div>'
+      +'<div class="dp">'
+        +'<div class="tc">'
+          +'<div class="fg">'
+            +'<label class="fl" for="d_'+m.id+'">Date Summited</label>'
+            +'<input type="date" id="d_'+m.id+'" class="fi" data-fld="date" data-fid="'+m.id+'" value="'+esc(p.date||'')+'">'
+          +'</div>'
+          +'<div class="fg">'
+            +'<label class="fl" for="c_'+m.id+'">Summited With</label>'
+            +'<input type="text" id="c_'+m.id+'" class="fi" data-fld="companions" data-fid="'+m.id+'" value="'+esc(p.companions||'')+'" placeholder="Solo or names…">'
+          +'</div>'
+        +'</div>'
+        +'<div class="fg">'
+          +'<label class="fl" for="n_'+m.id+'">Notes</label>'
+          +'<textarea id="n_'+m.id+'" class="fi" data-fld="notes" data-fid="'+m.id+'" placeholder="Route, conditions, memories…">'+esc(p.notes||'')+'</textarea>'
+        +'</div>'
+      +'</div>'
+    +'</div>';
+  }).join('');
+}
+
+// ─── Full render ─────────────────────────────────────────────
+function fullRender() {
+  document.body.className = ST.dark?'dark':'light';
+  document.getElementById('dkbtn').textContent = ST.dark?'🌙':'☀️';
+  document.querySelectorAll('.fbtn').forEach(b=>b.classList.toggle('act', b.dataset.f===ST.filter));
+  document.getElementById('sortSel').value = ST.sort;
+  document.getElementById('areaSel').value = ST.area;
+  updateProgressUI();
+  renderList();
+}
+
+// ─── Populate area dropdown ───────────────────────────────────
+function populateAreas() {
+  const areas = [...new Set(MUNROS.map(m=>m.area))].sort();
+  const sel = document.getElementById('areaSel');
+  areas.forEach(a=>{
+    const o = document.createElement('option');
+    o.value = a; o.textContent = a; sel.appendChild(o);
+  });
+}
+
+// ─── Toggle done ─────────────────────────────────────────────
+function toggleDone(id) {
+  const p = ST.progress[id]||{};
+  const nowDone = !p.done;
+  ST.progress[id] = Object.assign({},p,{done:nowDone});
+  if(nowDone && !ST.progress[id].date) ST.progress[id].date = today();
+  save();
+
+  const card = document.querySelector('.mc[data-id="'+id+'"]');
+  if(card) {
+    const m = MUNROS.find(x=>x.id===id);
+    const pr = ST.progress[id];
+    card.classList.toggle('done', nowDone);
+    const cb = card.querySelector('.cb'); if(cb) cb.textContent = nowDone?'✓':'';
+    const mm = card.querySelector('.mm');
+    if(mm && m) {
+      const parts=[m.area,m.grid];
+      if(nowDone&&pr.date) parts.push(fmtDate(pr.date));
+      if(nowDone&&pr.companions) parts.push(pr.companions);
+      mm.textContent=parts.join(' · ');
+    }
+    const di = card.querySelector('[data-fld="date"]');
+    if(di && nowDone && pr.date && !di.value) di.value = pr.date;
+  }
+  // Remove from filtered list if filter is active
+  if(ST.filter==='done'&&!nowDone && card) card.style.display='none';
+  if(ST.filter==='rem' &&nowDone  && card) card.style.display='none';
+  updateProgressUI();
+}
+
+// ─── Expand / collapse ───────────────────────────────────────
+function expandToggle(id) {
+  const card = document.querySelector('.mc[data-id="'+id+'"]');
+  if(!card) return;
+  if(ST.expanded===id) {
+    card.classList.remove('expanded'); ST.expanded=null;
+  } else {
+    if(ST.expanded) {
+      const prev = document.querySelector('.mc[data-id="'+ST.expanded+'"]');
+      if(prev) prev.classList.remove('expanded');
+    }
+    card.classList.add('expanded'); ST.expanded=id;
+    setTimeout(()=>card.scrollIntoView({behavior:'smooth',block:'nearest'}),60);
+  }
+}
+
+// ─── Update field ─────────────────────────────────────────────
+function updateField(id, field, val) {
+  if(!ST.progress[id]) ST.progress[id]={done:false};
+  ST.progress[id][field]=val; save();
+  if(field==='date'||field==='companions') {
+    const card = document.querySelector('.mc[data-id="'+id+'"]');
+    const m = MUNROS.find(x=>x.id===id);
+    if(card && m) {
+      const p=ST.progress[id]; const done=!!p.done;
+      const parts=[m.area,m.grid];
+      if(done&&p.date) parts.push(fmtDate(p.date));
+      if(done&&p.companions) parts.push(p.companions);
+      const mm=card.querySelector('.mm'); if(mm) mm.textContent=parts.join(' · ');
+    }
+  }
+}
+
+// ─── Toast ───────────────────────────────────────────────────
+let _tt;
+function showToast(msg) {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(_tt); _tt=setTimeout(()=>t.classList.remove('show'),2600);
+}
+
+// ─── Export ──────────────────────────────────────────────────
+function doExport() {
+  const data = {
+    app:'Munro Log', version:2,
+    exported:new Date().toISOString(),
+    bagged:doneCount(), total:282,
+    progress:ST.progress
+  };
+  const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href=url; a.download='munro-log-'+today()+'.json'; a.click();
+  URL.revokeObjectURL(url);
+  showToast('Progress exported ✓');
+}
+
+// ─── Import ──────────────────────────────────────────────────
+function doImport(file) {
+  const r = new FileReader();
+  r.onload = e => {
+    try {
+      const d = JSON.parse(e.target.result);
+      let p = d.progress || d;
+      if(typeof p!=='object'||Array.isArray(p)) throw new Error('bad');
+      ST.progress=p; save(); fullRender();
+      showToast('Imported — '+doneCount()+' Munros logged');
+    } catch(_) { showToast('Error: unrecognised file format'); }
+  };
+  r.readAsText(file);
+}
+
+// ─── Event wiring ────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded',()=>{
+  load();
+  populateAreas();
+  fullRender();
+
+  // Search — debounced
+  let _st;
+  document.getElementById('si').addEventListener('input',e=>{
+    clearTimeout(_st);
+    _st=setTimeout(()=>{ ST.search=e.target.value.trim(); fullRender(); },180);
+  });
+  // Prevent form submission on iOS
+  document.getElementById('si').addEventListener('keydown',e=>{ if(e.key==='Enter') e.preventDefault(); });
+
+  // Filter buttons
+  document.querySelectorAll('.fbtn').forEach(b=>{
+    b.addEventListener('click',()=>{ ST.filter=b.dataset.f; fullRender(); });
+  });
+
+  // Sort & area selects
+  document.getElementById('sortSel').addEventListener('change',e=>{ ST.sort=e.target.value; fullRender(); });
+  document.getElementById('areaSel').addEventListener('change',e=>{ ST.area=e.target.value; fullRender(); });
+
+  // Dark mode
+  document.getElementById('dkbtn').addEventListener('click',()=>{
+    ST.dark=!ST.dark; saveSettings();
+    document.body.className=ST.dark?'dark':'light';
+    document.getElementById('dkbtn').textContent=ST.dark?'🌙':'☀️';
+  });
+
+  // Export / Import / Reset
+  document.getElementById('expBtn').addEventListener('click',doExport);
+  document.getElementById('impBtn').addEventListener('click',()=>document.getElementById('impFile').click());
+  document.getElementById('impFile').addEventListener('change',e=>{
+    if(e.target.files[0]){ doImport(e.target.files[0]); e.target.value=''; }
+  });
+  document.getElementById('rstBtn').addEventListener('click',()=>document.getElementById('dlg').classList.add('show'));
+  document.getElementById('dlgNo').addEventListener('click',()=>document.getElementById('dlg').classList.remove('show'));
+  document.getElementById('dlgYes').addEventListener('click',()=>{
+    ST.progress={}; save(); ST.expanded=null;
+    document.getElementById('dlg').classList.remove('show');
+    fullRender(); showToast('All progress cleared');
+  });
+  document.getElementById('dlg').addEventListener('click',e=>{
+    if(e.target===document.getElementById('dlg')) document.getElementById('dlg').classList.remove('show');
+  });
+
+  // Delegated: checkbox toggle + expand
+  document.getElementById('list').addEventListener('click',e=>{
+    if(e.target.matches('input,textarea,select,label')) return;
+    const cb = e.target.closest('[data-cb]');
+    if(cb){ toggleDone(parseInt(cb.dataset.cb,10)); return; }
+    const ex = e.target.closest('[data-ex]');
+    if(ex){ expandToggle(parseInt(ex.dataset.ex,10)); }
+  });
+
+  // Delegated: field changes
+  document.getElementById('list').addEventListener('change',e=>{
+    const el=e.target.closest('[data-fld]');
+    if(el) updateField(parseInt(el.dataset.fid,10), el.dataset.fld, el.value);
+  });
+  document.getElementById('list').addEventListener('input',e=>{
+    const el=e.target.closest('textarea[data-fld]');
+    if(el) updateField(parseInt(el.dataset.fid,10), el.dataset.fld, el.value);
+  });
+});
+</script>
+</body>
+</html>
